@@ -20,7 +20,7 @@ use blogfile::BlogFile;
 #[structopt(about = "fer yer blag")]
 struct Options {
     /// Input directory.
-    #[structopt(short, long)]
+    #[structopt(short, long, default_value = ".")]
     in_dir: PathBuf,
     /// Output directory.
     #[structopt(short, long)]

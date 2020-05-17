@@ -1,9 +1,4 @@
-use std::{
-    fs,
-    fs::DirEntry,
-    io,
-    path::{Component, Path, PathBuf},
-};
+use std::{fs, fs::DirEntry, io, path::Path};
 
 /// Ensure the parent of `path` exists, creating it recursively if need be.
 pub fn ensure_parent<P: AsRef<Path>>(path: P) -> io::Result<()> {
