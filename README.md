@@ -1,4 +1,6 @@
 # `blagger`
+![Crates.io](https://img.shields.io/crates/l/blagger/0.1.0)
+
 fer yer blag
 
 `blagger` is the world's dumbest static site generator, rivaled only by that pipeline of Bash and Python scripts everyone thinks about making once.
