@@ -37,6 +37,7 @@ Markdown files are processed as follows:
       * In the template, a formatter named `markdown` is available for rendering Markdown strings.
 2. The rendered file is written to `out-dir` using the same directory-preserving scheme as other files, with the extension changed to `html` so browsers know what the heck is going on.
 
+The template file is never emitted to `out-dir`.
 ## To-do list
 - [ ] Multiple templates available
 - [ ] Tag navigation pages

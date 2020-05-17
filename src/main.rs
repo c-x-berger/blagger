@@ -20,17 +20,12 @@ use blogfile::BlogFile;
 #[structopt(about = "fer yer blag")]
 struct Options {
     /// Input directory.
-    ///
-    /// Must be a **relative** path due to limitations in how files are "moved" into the output
-    /// directory.
     #[structopt(short, long)]
     in_dir: PathBuf,
     /// Output directory.
-    ///
-    /// No limitations. Go wild.
     #[structopt(short, long)]
     out_dir: PathBuf,
-    /// Path to template file for Markdown posts.
+    /// Path to template file for Markdown posts
     ///
     /// Assumed to contain a valid [`tinytemplate`] template. The following values/formatters will
     /// be available in rendering:
@@ -47,41 +42,35 @@ struct Options {
 
 fn main() -> io::Result<()> {
     let mut opts = Options::from_args();
+    opts.in_dir = opts.in_dir.canonicalize()?;
+    opts.template_html = opts.template_html.canonicalize()?;
 
     println!("Hello, world!");
-    let in_dir_str = match opts.in_dir.to_str() {
-        Some(s) => String::from(s),
-        None => opts.in_dir.to_string_lossy().into_owned(),
-    };
-    let out_dir_str = match opts.out_dir.to_str() {
-        Some(s) => String::from(s),
-        None => opts.out_dir.to_string_lossy().into_owned(),
-    };
     let mut template = String::new();
     BufReader::new(File::open(&opts.template_html)?).read_to_string(&mut template)?;
     let mut compiler = PostCompiler::new(&template);
-    print!("Checking if {} exists: ", out_dir_str);
     if !opts.out_dir.exists() {
-        println!("it does not. Creating.");
         fs::create_dir_all(&opts.out_dir)?;
     } else {
-        print!("it does.\nChecking that it is a directory: ");
         if !opts.out_dir.is_dir() {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "output path was not a directory",
             ));
         }
-        println!("it is. Continuing with confidence.")
     }
     opts.out_dir = opts.out_dir.canonicalize()?;
-    println!("Building file list of {}...", in_dir_str);
     let entries = fs_ext::all_contents(&opts.in_dir)?;
-    let entries = entries.iter().filter(|e| !(e.path() == opts.template_html));
     let mapped_files = entries
-        .map(|entry| -> io::Result<_> { Ok(BlogFile::try_from(entry.path().as_ref())?) })
-        .map(|r| r.unwrap())
-        .map(|f| f.simulate_move(&opts.out_dir).unwrap());
+        .iter()
+        .filter(|e| !(e.path() == opts.template_html))
+        .map(|e| -> io::Result<_> {
+            let path = e.path();
+            let file = BlogFile::try_from(path.as_ref())?;
+            let relpath = path.strip_prefix(&opts.in_dir).unwrap();
+            Ok(file.change_path(opts.out_dir.join(relpath)))
+        })
+        .map(|r| r.unwrap());
     for file in mapped_files {
         match file {
             BlogFile::Other(dest, mut file) => {
@@ -101,5 +90,6 @@ fn main() -> io::Result<()> {
             }
         }
     }
+    println!("Done!");
     Ok(())
 }

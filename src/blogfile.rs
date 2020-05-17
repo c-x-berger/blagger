@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{fs_ext, post::Post};
+use crate::post::Post;
 
 #[derive(Debug)]
 pub enum BlogFile {
@@ -14,17 +14,10 @@ pub enum BlogFile {
 }
 
 impl BlogFile {
-    pub fn simulate_move<P: AsRef<Path>>(self, out_dir: P) -> io::Result<Self> {
-        let out_dir = out_dir.as_ref();
+    pub fn change_path(self, new: PathBuf) -> Self {
         match self {
-            BlogFile::Post(path, inner) => {
-                let new_p = fs_ext::simulate_move(path.as_ref(), out_dir)?;
-                Ok(BlogFile::Post(new_p, inner))
-            }
-            BlogFile::Other(path, inner) => {
-                let new_p = fs_ext::simulate_move(path.as_ref(), out_dir)?;
-                Ok(BlogFile::Other(new_p, inner))
-            }
+            BlogFile::Post(_, inner) => (BlogFile::Post(new, inner)),
+            BlogFile::Other(_, inner) => (BlogFile::Other(new, inner)),
         }
     }
 }
