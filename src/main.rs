@@ -17,12 +17,31 @@ mod post;
 use blogfile::BlogFile;
 
 #[derive(StructOpt)]
+#[structopt(about = "fer yer blag")]
 struct Options {
+    /// Input directory.
+    ///
+    /// Must be a **relative** path due to limitations in how files are "moved" into the output
+    /// directory.
     #[structopt(short, long)]
     in_dir: PathBuf,
+    /// Output directory.
+    ///
+    /// No limitations. Go wild.
     #[structopt(short, long)]
     out_dir: PathBuf,
-    #[structopt(short, long)]
+    /// Path to template file for Markdown posts.
+    ///
+    /// Assumed to contain a valid [`tinytemplate`] template. The following values/formatters will
+    /// be available in rendering:
+    ///
+    /// - `md_content`: The raw markdown content of the post being rendered.
+    /// - `front`: A `FrontMatter` object with the following fields:
+    ///   - `title`: The post's title.
+    ///   - `subtitile`: The post's subtitle, or `None`.
+    ///   - `date`: The post's publication date, or `None`.
+    ///   - `tags`: A possibly-empty array of tags (strings.)
+    #[structopt(short, long, verbatim_doc_comment)]
     template_html: PathBuf,
 }
 
