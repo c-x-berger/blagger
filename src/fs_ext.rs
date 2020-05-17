@@ -5,6 +5,7 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
+/// Ensure the parent of `path` exists, creating it recursively if need be.
 pub fn ensure_parent<P: AsRef<Path>>(path: P) -> io::Result<()> {
     match path.as_ref().parent() {
         Some(p) => fs::create_dir_all(p),
@@ -35,6 +36,7 @@ pub fn all_contents<P: AsRef<Path>>(dir: P) -> io::Result<Vec<DirEntry>> {
 }
 
 /// Return the result of "moving" the **relative** path `file` to the **directory** given by `out`.
+///
 /// To avoid bizzare behaviour, this function errors if any of the following are true:
 ///
 /// - `file` is not a relative path
