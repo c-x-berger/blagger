@@ -1,5 +1,5 @@
 # `blagger`
-![Crates.io](https://img.shields.io/crates/l/blagger/0.1.0)
+[![Crates.io](https://img.shields.io/crates/v/blagger)](https://crates.io/crates/blagger) ![MIT OR Apache licensed](https://img.shields.io/crates/l/blagger)
 
 fer yer blag
 
