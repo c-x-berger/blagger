@@ -75,7 +75,7 @@ date = 2020-05-16 21:38:05+00:00
 This is a post!"#;
         let post = Post::read_from(input.as_bytes())?;
         assert_eq!(
-            post.get_frontmatter().title,
+            post.frontmatter().title,
             String::from("Test Post Please Ignore")
         );
         assert_eq!(post.md_content, String::from("This is a post!"));
