@@ -9,16 +9,18 @@ fer yer blag
 ## Usage
 ```
 USAGE:
-    blagger --in-dir <in-dir> --out-dir <out-dir> --template-html <template-html>
+    blagger [FLAGS] [OPTIONS] --out-dir <out-dir>
 
 FLAGS:
     -h, --help       Prints help information
+    -a               Include hidden files
     -V, --version    Prints version information
 
 OPTIONS:
-    -i, --in-dir <in-dir>                  Input directory
-    -o, --out-dir <out-dir>                Output directory
-    -t, --template-html <template-html>    Path to template file for Markdown posts.
+    -I, --ignored-files <ignored-files>...    List of files to ignore [default: ]
+    -i, --in-dir <in-dir>                     Input directory [default: .]
+    -o, --out-dir <out-dir>                   Output directory
+    -t, --template-html <template-html>       Path to template file for Markdown posts
 ```
 
 ### Templating
