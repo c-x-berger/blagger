@@ -72,8 +72,8 @@ fn main() -> io::Result<()> {
         .iter()
         .filter(|e| {
             let path = e.path();
-            if !(path == template_path || path.starts_with(&opts.out_dir)) {
-                opts.ignored_files.iter().any(|f| path.ends_with(f))
+            if path != template_path && !path.starts_with(&opts.out_dir) {
+                !opts.ignored_files.iter().any(|f| path.ends_with(f))
             } else {
                 false
             }
