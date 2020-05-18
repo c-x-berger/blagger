@@ -3,7 +3,7 @@ use std::{io, io::Read};
 use serde::{Deserialize, Serialize};
 use toml::value::Datetime;
 
-const MATTER_SPLITTER: &'static str = r#"::===::\n"#;
+const MATTER_SPLITTER: &'static str = "::===::\n";
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FrontMatter {
