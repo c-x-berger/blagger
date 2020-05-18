@@ -49,10 +49,6 @@ impl Post {
     pub fn frontmatter(&self) -> &FrontMatter {
         &self.front
     }
-
-    pub fn content(&self) -> &str {
-        &self.md_content
-    }
 }
 
 #[cfg(test)]
