@@ -40,7 +40,7 @@ struct Options {
     #[structopt(short, long, verbatim_doc_comment)]
     template_html: Option<PathBuf>,
     /// List of files to ignore
-    #[structopt(short, long, default_value = "")]
+    #[structopt(short = "I", long, default_value = "")]
     ignored_files: Vec<String>,
 }
 
