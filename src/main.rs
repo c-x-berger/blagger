@@ -27,6 +27,7 @@ struct Options {
     out_dir: PathBuf,
     /// Path to template file for Markdown posts
     ///
+    /// Default is `${in-dir}/template.html`.
     /// Assumed to contain a valid [`tinytemplate`] template. The following values/formatters will
     /// be available in rendering:
     ///
@@ -37,17 +38,20 @@ struct Options {
     ///   - `date`: The post's publication date, or `None`.
     ///   - `tags`: A possibly-empty array of tags (strings.)
     #[structopt(short, long, verbatim_doc_comment)]
-    template_html: PathBuf,
+    template_html: Option<PathBuf>,
 }
 
 fn main() -> io::Result<()> {
     let mut opts = Options::from_args();
     opts.in_dir = opts.in_dir.canonicalize()?;
-    opts.template_html = opts.template_html.canonicalize()?;
 
     println!("Hello, world!");
     let mut template = String::new();
-    BufReader::new(File::open(&opts.template_html)?).read_to_string(&mut template)?;
+    let template_path = match &opts.template_html {
+        Some(p) => p.clone(),
+        None => opts.in_dir.join("template.html"),
+    };
+    BufReader::new(File::open(&template_path)?).read_to_string(&mut template)?;
     let mut compiler = PostCompiler::new(&template);
     if !opts.out_dir.exists() {
         fs::create_dir_all(&opts.out_dir)?;
