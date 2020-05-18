@@ -43,6 +43,9 @@ struct Options {
     /// List of files to ignore
     #[structopt(short = "I", long, default_value = "")]
     ignored_files: Vec<String>,
+    /// Include hidden files.
+    ///
+    /// A file is "hidden" if it or any of its parents up to `${in-dir}` start with a `.`.
     #[structopt(short = "a")]
     read_hidden: bool,
 }
