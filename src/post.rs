@@ -3,23 +3,20 @@ use std::{io, io::Read};
 use serde::{Deserialize, Serialize};
 use toml::value::Datetime;
 
-const MATTER_SPLITTER: &'static str = "::===::\n";
+const MATTER_SPLITTER: &'static str = r#"::===::\n"#;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FrontMatter {
     title: String,
     tags: Vec<String>,
     subtitle: Option<String>,
+    description: Option<String>,
     date: Option<Datetime>,
 }
 
 impl FrontMatter {
     pub fn tags(&self) -> &[String] {
         &self.tags
-    }
-
-    pub fn title(&self) -> &str {
-        &self.title
     }
 }
 
