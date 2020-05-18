@@ -39,6 +39,9 @@ struct Options {
     ///   - `tags`: A possibly-empty array of tags (strings.)
     #[structopt(short, long, verbatim_doc_comment)]
     template_html: Option<PathBuf>,
+    /// List of files to ignore
+    #[structopt(short, long, default_value = "")]
+    ignored_files: Vec<String>,
 }
 
 fn main() -> io::Result<()> {
@@ -67,7 +70,14 @@ fn main() -> io::Result<()> {
     let entries = fs_ext::all_contents(&opts.in_dir)?;
     let mapped_files = entries
         .iter()
-        .filter(|e| !(e.path() == opts.template_html))
+        .filter(|e| {
+            let path = e.path();
+            if !(path == template_path || path.starts_with(&opts.out_dir)) {
+                opts.ignored_files.iter().any(|f| path.ends_with(f))
+            } else {
+                false
+            }
+        })
         .map(|e| -> io::Result<_> {
             let path = e.path();
             let file = BlogFile::try_from(path.as_ref())?;
