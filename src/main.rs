@@ -1,5 +1,6 @@
 use std::{
     convert::TryFrom,
+    ffi::OsStr,
     fs,
     fs::File,
     io,
@@ -42,6 +43,8 @@ struct Options {
     /// List of files to ignore
     #[structopt(short = "I", long, default_value = "")]
     ignored_files: Vec<String>,
+    #[structopt(short = "a")]
+    read_hidden: bool,
 }
 
 fn main() -> io::Result<()> {
@@ -70,19 +73,28 @@ fn main() -> io::Result<()> {
     let entries = fs_ext::all_contents(&opts.in_dir)?;
     let mapped_files = entries
         .iter()
-        .filter(|e| {
+        .filter_map(|e| -> Option<io::Result<BlogFile>> {
             let path = e.path();
-            if path != template_path && !path.starts_with(&opts.out_dir) {
-                !opts.ignored_files.iter().any(|f| path.ends_with(f))
-            } else {
-                false
-            }
-        })
-        .map(|e| -> io::Result<_> {
-            let path = e.path();
-            let file = BlogFile::try_from(path.as_ref())?;
             let relpath = path.strip_prefix(&opts.in_dir).unwrap();
-            Ok(file.change_path(opts.out_dir.join(relpath)))
+            if path != template_path && !path.starts_with(&opts.out_dir) {
+                if !opts.read_hidden
+                    && relpath.ancestors().any(|c| {
+                        c.file_name()
+                            .unwrap_or(OsStr::new(""))
+                            .to_string_lossy()
+                            .starts_with(".")
+                    })
+                {
+                    return None;
+                }
+                if !opts.ignored_files.iter().any(|f| relpath.ends_with(f)) {
+                    let file = BlogFile::try_from(path.as_ref()).unwrap();
+                    return Some(Ok(file.change_path(opts.out_dir.join(relpath))));
+                }
+                None
+            } else {
+                None
+            }
         })
         .map(|r| r.unwrap());
     for file in mapped_files {
