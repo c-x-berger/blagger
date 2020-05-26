@@ -8,7 +8,9 @@ use std::{
     path::PathBuf,
 };
 
+use serde_json::json;
 use structopt::StructOpt;
+use tinytemplate::TinyTemplate;
 
 mod blogfile;
 mod compiler;
@@ -136,6 +138,23 @@ fn main() -> io::Result<()> {
                 io::copy(&mut parsed.as_bytes(), &mut output)?;
             }
         }
+    }
+    match opts.tag_template_html {
+        Some(path) => {
+            let mut templater = TinyTemplate::new();
+            let mut templ_file = File::open(path)?;
+            let mut template = String::new();
+            templ_file.read_to_string(&mut template)?;
+            templater.add_template("tag", &template).unwrap();
+            for tag in compiler.tags() {
+                let value = json!({"tag": tag, "posts": compiler.tagged_as(tag)});
+                let rendered = templater.render("tag", &value).unwrap();
+                let dest = opts.tag_pages_dir.join(format!("{}.html", tag));
+                let mut output = File::create(dest)?;
+                io::copy(&mut rendered.as_bytes(), &mut output)?;
+            }
+        }
+        None => (),
     }
     println!("Done!");
     Ok(())
