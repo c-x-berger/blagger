@@ -46,5 +46,5 @@ Markdown files are processed as follows:
 The template file is never emitted to `out-dir`.
 ## To-do list
 - [ ] Multiple templates available
-- [ ] Tag navigation pages
+- [x] [Tag navigation pages](TAG_TEMPLATES.md)
 - [ ] Sitemap
