@@ -40,6 +40,12 @@ struct Options {
     ///   - `tags`: A possibly-empty array of tags (strings.)
     #[structopt(short, long, verbatim_doc_comment)]
     template_html: Option<PathBuf>,
+    /// Template for tag pages. If not given, tag pages are not generated.
+    #[structopt(long)]
+    tag_template_html: Option<PathBuf>,
+    /// Directory relative to `${out-dir}` that tag pages will be rendered to.
+    #[structopt(long, default_value = "tags")]
+    tag_pages_dir: PathBuf,
     /// List of files to ignore
     #[structopt(short = "I", long, default_value = "")]
     ignored_files: Vec<String>,
@@ -73,6 +79,18 @@ fn main() -> io::Result<()> {
         }
     }
     opts.out_dir = opts.out_dir.canonicalize()?;
+    opts.tag_pages_dir = opts.out_dir.join(opts.tag_pages_dir);
+    if !opts.tag_pages_dir.exists() {
+        fs::create_dir_all(&opts.tag_pages_dir)?;
+    } else {
+        if !opts.tag_pages_dir.is_dir() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "output path was not a directory",
+            ));
+        }
+    }
+    opts.tag_pages_dir = opts.tag_pages_dir.canonicalize()?;
     let entries = fs_ext::all_contents(&opts.in_dir)?;
     let mapped_files = entries
         .iter()
