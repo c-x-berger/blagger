@@ -69,6 +69,7 @@ This is a post!"#;
             String::from("Test Post Please Ignore")
         );
         assert_eq!(post.md_content, String::from("This is a post!"));
+        assert_eq!(post.frontmatter().tags().len(), 4);
         Ok(())
     }
 }

@@ -8,7 +8,9 @@ use std::{
     path::PathBuf,
 };
 
+use serde_json::json;
 use structopt::StructOpt;
+use tinytemplate::TinyTemplate;
 
 mod blogfile;
 mod compiler;
@@ -40,6 +42,12 @@ struct Options {
     ///   - `tags`: A possibly-empty array of tags (strings.)
     #[structopt(short, long, verbatim_doc_comment)]
     template_html: Option<PathBuf>,
+    /// Template for tag pages. If not given, tag pages are not generated.
+    #[structopt(long)]
+    tag_template_html: Option<PathBuf>,
+    /// Directory relative to `${out-dir}` that tag pages will be rendered to.
+    #[structopt(long, default_value = "tags")]
+    tag_pages_dir: PathBuf,
     /// List of files to ignore
     #[structopt(short = "I", long, default_value = "")]
     ignored_files: Vec<String>,
@@ -73,6 +81,18 @@ fn main() -> io::Result<()> {
         }
     }
     opts.out_dir = opts.out_dir.canonicalize()?;
+    opts.tag_pages_dir = opts.out_dir.join(opts.tag_pages_dir);
+    if !opts.tag_pages_dir.exists() {
+        fs::create_dir_all(&opts.tag_pages_dir)?;
+    } else {
+        if !opts.tag_pages_dir.is_dir() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "output path was not a directory",
+            ));
+        }
+    }
+    opts.tag_pages_dir = opts.tag_pages_dir.canonicalize()?;
     let entries = fs_ext::all_contents(&opts.in_dir)?;
     let mapped_files = entries
         .iter()
@@ -118,6 +138,23 @@ fn main() -> io::Result<()> {
                 io::copy(&mut parsed.as_bytes(), &mut output)?;
             }
         }
+    }
+    match opts.tag_template_html {
+        Some(path) => {
+            let mut templater = TinyTemplate::new();
+            let mut templ_file = File::open(path)?;
+            let mut template = String::new();
+            templ_file.read_to_string(&mut template)?;
+            templater.add_template("tag", &template).unwrap();
+            for tag in compiler.tags() {
+                let value = json!({"tag": tag, "posts": compiler.tagged_as(tag)});
+                let rendered = templater.render("tag", &value).unwrap();
+                let dest = opts.tag_pages_dir.join(format!("{}.html", tag));
+                let mut output = File::create(dest)?;
+                io::copy(&mut rendered.as_bytes(), &mut output)?;
+            }
+        }
+        None => (),
     }
     println!("Done!");
     Ok(())

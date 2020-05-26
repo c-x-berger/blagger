@@ -1,6 +1,7 @@
-use std::{collections::HashMap, fmt::Write, io};
+use std::{fmt::Write, io};
 
 use pulldown_cmark::{html, Options, Parser};
+use serde::Serialize;
 use serde_json::Value;
 use tinytemplate::{error::Result as TemplateResult, TinyTemplate};
 
@@ -9,20 +10,40 @@ use crate::post::Post;
 const TEMPLATE_ID: &'static str = "tpl";
 const ALL_OPTIONS: Options = Options::all();
 
+#[derive(Serialize)]
+pub struct CompiledPost {
+    post: Post,
+    path: String,
+}
+
+impl CompiledPost {
+    pub fn new(post: Post, path: String) -> Self {
+        Self { post, path }
+    }
+
+    pub fn post(&self) -> &Post {
+        &self.post
+    }
+}
+
 pub struct PostCompiler<'a> {
     tt: TinyTemplate<'a>,
-    tags: HashMap<String, Vec<String>>,
+    posts: Vec<CompiledPost>,
+    tags: Vec<String>,
 }
 
 impl<'a> PostCompiler<'a> {
     pub fn new(template: &'a str) -> Self {
-        let tags = HashMap::new();
         let mut tt = TinyTemplate::new();
         tt.add_template(TEMPLATE_ID, template).unwrap();
         tt.add_formatter("markdown", Self::template_md);
         tt.add_formatter("commasep", Self::commasep);
 
-        Self { tt, tags }
+        Self {
+            tt,
+            posts: vec![],
+            tags: vec![],
+        }
     }
 
     fn parse(text: &str, md_opts: Options) -> String {
@@ -80,20 +101,35 @@ impl<'a> PostCompiler<'a> {
     /// URL of the page as is will appear in the final site, and is used for the tag system.
     /// Omitting it will cause `post` to not appear on tag list pages.
     pub fn parse_post(&mut self, post: Post, deployed_url: Option<String>) -> io::Result<String> {
-        if deployed_url.is_some() {
-            for tag in post.frontmatter().tags() {
-                let url = deployed_url.clone().unwrap();
-                match self.tags.get_mut(tag) {
-                    Some(v) => v.push(url),
-                    None => {
-                        self.tags.insert(tag.to_string(), vec![url]);
-                        ()
+        let ret = self
+            .tt
+            .render(TEMPLATE_ID, &post)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e));
+        match ret {
+            Ok(rendered) => {
+                for tag in post.frontmatter().tags() {
+                    if !self.tags.contains(tag) {
+                        self.tags.push(tag.clone());
                     }
                 }
+                match deployed_url {
+                    Some(url) => self.posts.push(CompiledPost::new(post, url)),
+                    None => (),
+                }
+                Ok(rendered)
             }
+            Err(e) => Err(e),
         }
-        self.tt
-            .render(TEMPLATE_ID, &post)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+    }
+
+    pub fn tags(&self) -> &[String] {
+        &self.tags
+    }
+
+    pub fn tagged_as(&self, tag: &str) -> Vec<&CompiledPost> {
+        self.posts
+            .iter()
+            .filter(|p| p.post().frontmatter().tags().contains(&tag.to_owned()))
+            .collect()
     }
 }
