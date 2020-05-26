@@ -1,6 +1,6 @@
 [package]
 name = "blagger"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Caleb Xavier Berger <caleb.x.berger@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/c-x-berger/blagger"
