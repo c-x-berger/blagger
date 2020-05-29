@@ -45,6 +45,7 @@ Markdown files are processed as follows:
 
 The template file is never emitted to `out-dir`.
 ## To-do list
-- [ ] Multiple templates available
 - [x] [Tag navigation pages](https://github.com/c-x-berger/blagger/blob/master/TAG_TEMPLATES.md)
-- [ ] Sitemap
+- [ ] RSS feed generation
+- [ ] Multiple templates available
+- [ ] Sitemap?
