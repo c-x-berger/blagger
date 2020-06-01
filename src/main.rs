@@ -61,10 +61,10 @@ struct Options {
 }
 
 fn main() -> io::Result<()> {
-    println!("Hello, world!");
-
     let mut opts = Options::from_args();
     opts.in_dir = opts.in_dir.canonicalize()?;
+
+    println!("Hello, world!");
 
     let mut template = String::new();
     let template_path = match opts.template_html.as_ref() {
