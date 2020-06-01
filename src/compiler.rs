@@ -1,4 +1,4 @@
-use std::{fmt::Write, io};
+use std::{collections::HashSet, fmt::Write, io};
 
 use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
@@ -29,7 +29,7 @@ impl CompiledPost {
 pub struct PostCompiler<'a> {
     tt: TinyTemplate<'a>,
     posts: Vec<CompiledPost>,
-    tags: Vec<String>,
+    tags: HashSet<String>,
 }
 
 impl<'a> PostCompiler<'a> {
@@ -42,7 +42,7 @@ impl<'a> PostCompiler<'a> {
         Self {
             tt,
             posts: vec![],
-            tags: vec![],
+            tags: HashSet::new(),
         }
     }
 
@@ -108,9 +108,7 @@ impl<'a> PostCompiler<'a> {
         match ret {
             Ok(rendered) => {
                 for tag in post.frontmatter().tags() {
-                    if !self.tags.contains(tag) {
-                        self.tags.push(tag.clone());
-                    }
+                    self.tags.insert(tag.clone());
                 }
                 match deployed_url {
                     Some(url) => self.posts.push(CompiledPost::new(post, url)),
@@ -122,7 +120,7 @@ impl<'a> PostCompiler<'a> {
         }
     }
 
-    pub fn tags(&self) -> &[String] {
+    pub fn tags(&self) -> &HashSet<String> {
         &self.tags
     }
 
