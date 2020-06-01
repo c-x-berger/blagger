@@ -15,6 +15,22 @@ pub struct FrontMatter {
 }
 
 impl FrontMatter {
+    pub fn new(
+        title: String,
+        tags: Vec<String>,
+        subtitle: Option<String>,
+        description: Option<String>,
+        date: Option<Datetime>,
+    ) -> Self {
+        Self {
+            title,
+            tags,
+            subtitle,
+            description,
+            date,
+        }
+    }
+
     pub fn tags(&self) -> &[String] {
         &self.tags
     }
