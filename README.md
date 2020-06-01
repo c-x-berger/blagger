@@ -17,14 +17,15 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -I, --ignored-files <ignored-files>...         List of files to ignore [default: ]
-    -i, --in-dir <in-dir>                          Input directory [default: .]
-    -o, --out-dir <out-dir>                        Output directory
-        --tag-pages-dir <tag-pages-dir>
-            Directory relative to `${out-dir}` that tag pages will be rendered to [default: tags]
-
-        --tag-template-html <tag-template-html>    Template for tag pages. If not given, tag pages are not generated
-    -t, --template-html <template-html>            Path to template file for Markdown posts
+    -I, --ignored-files <ignored-files>...    List of files to ignore [default: ]
+    -i, --in-dir <in-dir>                     Input directory [default: .]
+    -o, --out-dir <out-dir>                   Output directory
+        --tag-html <tag-html>                 Template for tag pages. If not given, tag pages are not generated
+        --tag-hub <tag-hub>                   Template for the special "all tags" tag page. If not given, defaults to
+                                              tag_html
+        --tag-pages-dir <tag-pages-dir>       Directory relative to `${out-dir}` that tag pages will be rendered to
+                                              [default: tags]
+    -t, --template-html <template-html>       Path to template file for Markdown posts
 ```
 
 ### Templating
